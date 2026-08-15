@@ -195,7 +195,7 @@ if df is not None:
     st.dataframe(df.head(5))
 
 # Decide whether to (re)train: if user clicked run OR no model exists in session_state
-   need_train = run_button
+need_train = run_button
 
 # Training / prepare model and session_state objects
 if need_train:
