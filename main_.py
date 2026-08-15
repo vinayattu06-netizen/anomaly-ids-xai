@@ -18,7 +18,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
-import shap
 import os
 import io
 from typing import Tuple
@@ -134,11 +133,13 @@ def train_rf_model(X_train: pd.DataFrame, y_train: pd.Series, n_estimators: int 
 # SHAP explainer: cached safe version (underscore param) + uncached fallback
 @st.cache_resource(show_spinner=False)
 def get_shap_explainer(_model, background_data: pd.DataFrame, nsample: int = 200):
+    import shap
     bg = background_data.sample(n=min(nsample, len(background_data)), random_state=42)
     explainer = shap.TreeExplainer(_model, data=bg, model_output='probability')
     return explainer
 
 def get_shap_explainer_uncached(model, background_data: pd.DataFrame, nsample: int = 200):
+    import shap
     bg = background_data.sample(n=min(nsample, len(background_data)), random_state=42)
     explainer = shap.TreeExplainer(model, data=bg, model_output='probability')
     return explainer
@@ -300,10 +301,16 @@ if 'model' in st.session_state:
                     st.session_state.explainer = None
 
     explainer = st.session_state.get('explainer', None)
+    shap_module = None
+    if explainer is not None:
+        try:
+            import shap as shap_module
+        except Exception as e:
+            st.error(f"SHAP could not be loaded: {e}")
 
     # SHAP global summary
     st.subheader("🧠 SHAP Explainability (Global Feature Impact)")
-    if explainer is None:
+    if explainer is None or shap_module is None:
         st.warning("SHAP explainer not available.")
     else:
         if len(flagged_indices) > 0:
@@ -327,7 +334,7 @@ if 'model' in st.session_state:
             shap_subset = shap_vals_class1[:, top_idx]
 
             fig_shap = plt.figure(figsize=(9, 6))
-            shap.summary_plot(shap_subset, sample_subset, feature_names=top_features, plot_type="dot", show=False, max_display=top_k)
+            shap_module.summary_plot(shap_subset, sample_subset, feature_names=top_features, plot_type="dot", show=False, max_display=top_k)
             plt.tight_layout()
             st.pyplot(fig_shap)
             plt.close(fig_shap)
@@ -396,7 +403,7 @@ if 'model' in st.session_state:
             top_k_local = min(12, len(shap_df))
             try:
                 fig_wf = plt.figure(figsize=(9,5))
-                shap.plots.waterfall(instance_shap[0], max_display=top_k_local, show=False)
+                shap_module.plots.waterfall(instance_shap[0], max_display=top_k_local, show=False)
                 plt.tight_layout()
                 st.pyplot(fig_wf)
                 plt.close(fig_wf)
