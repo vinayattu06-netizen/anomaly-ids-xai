@@ -184,11 +184,7 @@ if uploaded_file is not None:
     except Exception as e:
         st.error(f"Could not read uploaded file: {e}")
 else:
-    try:
-        df = default_load('KDDTrain+.txt')
-        st.info("Loaded default dataset from KDDTrain+.txt")
-    except Exception:
-        df = None
+    st.info("Upload a dataset, configure the controls, then click 'Train Model & Run Detection'.")
 
 if df is not None:
     st.write("Preview (first 5 rows):")
