@@ -5,4 +5,3 @@ matplotlib
 seaborn
 streamlit
 numpy
-numpy
