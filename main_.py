@@ -51,10 +51,6 @@ def load_data():
     return df, df_encoded, X, y
 
 
-with st.spinner("Loading dataset..."):
-    df, df_encoded, X, y = load_data()
-st.success("Dataset loaded successfully!")
-
 # ==================================================================================
 # TRAIN MODEL
 # ==================================================================================
@@ -90,6 +86,10 @@ if st.button("🚀 Train Model & Run Detection", type="primary"):
     st.session_state["run_model"] = True
 
 if st.session_state["run_model"]:
+    with st.spinner("Loading dataset..."):
+        df, df_encoded, X, y = load_data()
+    st.success("Dataset loaded successfully!")
+
     with st.spinner("Training model..."):
         (
             model,
